@@ -1,8 +1,23 @@
-# Perform an operation on a cluster and return a new cluster
+# -*- coding: utf-8 -*-
+
+"""Operations.
+
+Perform an operation on a cluster and return a new cluster
+
+"""
+
+__author__ = "Jeremy Webb"
+
+#############################################################################
+# IMPORTS
 
 import numpy as np
 from ..util.recipes import rotate
 from galpy.util import bovy_conversion
+
+
+#############################################################################
+# CODE
 
 
 def save_cluster(cluster):
@@ -31,7 +46,9 @@ def save_cluster(cluster):
     return cluster.units, cluster.origin
 
 
-def return_cluster(cluster, units0, origin0, do_order=False, do_key_params=False):
+def return_cluster(
+    cluster, units0, origin0, do_order=False, do_key_params=False
+):
     """
     NAME:
 
@@ -61,7 +78,9 @@ def return_cluster(cluster, units0, origin0, do_order=False, do_key_params=False
     if cluster.units != units0:
         cluster.to_units(units0)
     if cluster.origin != origin0:
-        cluster.to_origin(origin0, do_order=do_order, do_key_params=do_key_params)
+        cluster.to_origin(
+            origin0, do_order=do_order, do_key_params=do_key_params
+        )
 
 
 def rotate_to_stream(cluster):
@@ -200,3 +219,7 @@ def reset_nbody_scale(cluster, mass=True, radii=True, rvirial=False, **kwargs):
     cluster.tstar = cluster.rbar / cluster.vstar
 
     return_cluster(cluster, units0, origin0)
+
+
+#############################################################################
+# END
