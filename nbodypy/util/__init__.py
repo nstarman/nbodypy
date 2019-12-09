@@ -8,9 +8,7 @@ __author__ = "Jeremy Webb"
 # IMPORTS
 
 # import modules (w/out internal dependencies)
-from . import constants, coordinates, plots, recipes
-
-# from . import output
+from . import constants, coordinates, plots, recipes, output
 
 # import functions
 from .constants import *
