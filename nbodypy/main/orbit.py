@@ -1,5 +1,11 @@
 # Functions and Operations that heavily use galpy and focus on the cluster's orbit
 
+# GENERAL
+import numpy as np
+
+# import astropy.coordinates as coord
+# import astropy.units as u
+
 from galpy.orbit import Orbit
 from galpy.util import bovy_coords, bovy_conversion
 from galpy import potential
@@ -7,15 +13,13 @@ from galpy.potential import LogarithmicHaloPotential, MWPotential2014, rtide
 from galpy.actionAngle import actionAngleStaeckel
 from galpy.actionAngle.actionAngleIsochroneApprox import actionAngleIsochroneApprox
 
-import numpy as np
-
+# PROJECT-SPECIFIC
+from ..data import get_data_orbits
 from ..util.recipes import rotate, interpolate, binmaker
 from .operations import save_cluster, return_cluster
 from .profiles import rho_prof
 from ..util.plots import *
 
-import astropy.coordinates as coord
-import astropy.units as u
 
 
 def initialize_orbit(cluster, from_centre=False, r0=8.0, v0=220.0):
@@ -1173,7 +1177,7 @@ def get_cluster_orbit(gcname="list", names=False, r0=8.0, v0=220.0):
        2019 - Written - Webb (UofT)
 
     """
-    data = np.loadtxt("/Users/webbjj/Codes/nbodypy/tables/orbits.dat", str)
+    data = np.loadtxt(get_data_orbits(), str)
     i_d = data[:, 0].astype("int")
 
     name = data[:, 1]
