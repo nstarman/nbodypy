@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""**DOCSTRING**."""
+
+__author__ = "Jeremy Webb"
+
+#############################################################################
+# IMPORTS
+
 from ..main.cluster import sub_cluster
 from ..util.recipes import *
 import numpy as np

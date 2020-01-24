@@ -70,7 +70,6 @@ requirements = [
     "scipy>=0.14.0",
     "galpy",
     "numba",
-    "limepy",
     "seaborn",
 ]
 
