@@ -3,11 +3,11 @@
 import numpy as np
 from galpy.util import bovy_coords
 
-from ..util.constants import *
-from ..util.recipes import *
+from ..utils.constants import *
+from ..utils.recipes import *
 from .operations import *
-from ..util.plots import *
-from ..util.coordinates import sphere_coords
+from ..utils.plots import *
+from ..utils.coordinates import sphere_coords
 from .functions import new_mass_function
 
 
@@ -62,7 +62,7 @@ def rho_prof(
 
     KWARGS:
 
-        Same as for ..util.plot.nplot
+        Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -235,7 +235,7 @@ def m_prof(
 
     KWARGS:
 
-       Same as for ..util.plot.nplot
+       Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -344,6 +344,7 @@ def m_prof(
 
     return rprof, mprof, nprof
 
+
 def new_alpha_prof(
     cluster,
     mmin=None,
@@ -404,7 +405,7 @@ def new_alpha_prof(
 
     KWARGS:
 
-       Same as for ..util.plot.nplot
+       Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -433,15 +434,15 @@ def new_alpha_prof(
         if omask is not None:
             try:
                 mcorr = omask.mcorr
-                return_error=True
+                return_error = True
             except:
                 mcorr = np.ones(cluster.ntot)
-                return_error=False
+                return_error = False
         else:
             mcorr = np.ones(cluster.ntot)
-            return_error=False
+            return_error = False
     else:
-        return_error=True
+        return_error = True
 
     lrprofn = []
     aprof = []
@@ -490,21 +491,60 @@ def new_alpha_prof(
         r_lower, r_mean, r_upper, r_hist = nbinmaker(r[indx], nrad)
     else:
         try:
-            r_lower, r_mean, r_upper = omask.r_lower, omask.r_mean, omask.r_upper
+            r_lower, r_mean, r_upper = (
+                omask.r_lower,
+                omask.r_mean,
+                omask.r_upper,
+            )
         except:
             r_lower, r_mean, r_upper, r_hist = nbinmaker(r[indx], nrad)
 
-    rbinerror=np.zeros(len(r_mean))
+    rbinerror = np.zeros(len(r_mean))
 
     for i in range(0, len(r_mean)):
         rindx = indx * (r >= r_lower[i]) * (r < r_upper[i])
 
         if return_error:
-            m_mean, m_hist, dm, alpha, ealpha, yalpha, eyalpha, mbinerror = new_mass_function(cluster,nmass=nmass,indx=rindx,projected=projected,mcorr=mcorr,omask=omask,plot=False,**kwargs)
-            rbinerror[i]=np.amin(mbinerror)
+            (
+                m_mean,
+                m_hist,
+                dm,
+                alpha,
+                ealpha,
+                yalpha,
+                eyalpha,
+                mbinerror,
+            ) = new_mass_function(
+                cluster,
+                nmass=nmass,
+                indx=rindx,
+                projected=projected,
+                mcorr=mcorr,
+                omask=omask,
+                plot=False,
+                **kwargs
+            )
+            rbinerror[i] = np.amin(mbinerror)
         else:
-            m_mean, m_hist, dm, alpha, ealpha, yalpha, eyalpha = new_mass_function(cluster,nmass=nmass,indx=rindx,projected=projected,mcorr=mcorr,omask=omask,plot=False,**kwargs)
-            rbinerror[i]=1.
+            (
+                m_mean,
+                m_hist,
+                dm,
+                alpha,
+                ealpha,
+                yalpha,
+                eyalpha,
+            ) = new_mass_function(
+                cluster,
+                nmass=nmass,
+                indx=rindx,
+                projected=projected,
+                mcorr=mcorr,
+                omask=omask,
+                plot=False,
+                **kwargs
+            )
+            rbinerror[i] = 1.0
 
         if alpha > -100:
             if projected:
@@ -552,6 +592,7 @@ def new_alpha_prof(
         return lrprofn, aprof, dalpha, edalpha, ydalpha, eydalpha, rbinerror
     else:
         return lrprofn, aprof, dalpha, edalpha, ydalpha, eydalpha
+
 
 def alpha_prof(
     cluster,
@@ -607,7 +648,7 @@ def alpha_prof(
 
     KWARGS:
 
-       Same as for ..util.plot.nplot
+       Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -783,7 +824,7 @@ def sigv_prof(
 
     KWARGS:
 
-       Same as for ..util.plot.nplot
+       Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -837,9 +878,9 @@ def sigv_prof(
     )
 
     if kwmin is not None:
-        indx*=(cluster.kw >= kwmin)
+        indx *= cluster.kw >= kwmin
     if kwmax is not None:
-        indx*=(cluster.kw <= kwmax)
+        indx *= cluster.kw <= kwmax
 
     if emin is not None:
         indx *= cluster.etot >= emin
@@ -856,7 +897,7 @@ def sigv_prof(
         r, phi, theta, vr, vp, vt = sphere_coords(cluster)
 
     if rcustom is not None:
-        r=rcustom
+        r = rcustom
 
     r_lower, r_mean, r_upper, r_hist = nbinmaker(r[indx], nrad)
 
@@ -873,16 +914,18 @@ def sigv_prof(
                 beta = sigt / sigr - 1.0
             else:
                 sigp = np.std(vp[rindx])
-                beta = 1.0 - (sigt ** 2.0 + sigp ** 2.0) / (2.0 * (sigr ** 2.0))
+                beta = 1.0 - (sigt ** 2.0 + sigp ** 2.0) / (
+                    2.0 * (sigr ** 2.0)
+                )
 
             if coord is None:
                 sigv = np.sqrt(sigr ** 2.0 + sigt ** 2.0 + sigp ** 2.0)
-            elif coord=='r':
-                sigv=sigr
-            elif coord=='phi':
-                sigv=sigp
-            elif coord=='theta':
-                sigv=sigt 
+            elif coord == "r":
+                sigv = sigr
+            elif coord == "phi":
+                sigv = sigp
+            elif coord == "theta":
+                sigv = sigt
 
             if normalize:
                 if projected:
@@ -949,7 +992,7 @@ def v_prof(
 
     KWARGS:
 
-       Same as for ..util.plot.nplot
+       Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -1099,7 +1142,7 @@ def eta_prof(
 
     KWARGS:
 
-       Same as for ..util.plot.nplot
+       Same as for ..utils.plot.nplot
 
     OUTPUT:
 
@@ -1256,7 +1299,7 @@ def vcirc_prof(
 
     KWARGS:
 
-        Same as for ..util.plot.nplot
+        Same as for ..utils.plot.nplot
 
     OUTPUT:
 

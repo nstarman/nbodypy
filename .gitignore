@@ -7,45 +7,12 @@
 # Large Data Files
 # ex: data/
 
-## Papers
-# ignores all contents except the figures & ABOUT.txt
-/papers/*/*
-!/papers/**/ABOUT.txt
-!/papers/**/figures/
-!/papers/**/figures/*
-# to not ignore a paper, add the path
-# ex: !/papers/_sample/
-
-## Presentations
-# ignores all contents except the figures & ABOUT.txt
-/presentations/*/*
-!/presentations/**/ABOUT.txt
-!/presentations/**/figures/
-!/presentations/**/figures/*
-# to not ignore a presentation, add the path
-# ex: !/presentations/_sample/
-
 # scratch folder
 scratch/
 
 # _old
 **/_old
 
-# scripts
-scripts/**/output
-
-# Environments subfolders
-envs/*/**
-
-# comment when done with public projects
-notebooks/**/*.png
-
-# un-comment these for projects before committing
-notebooks/_sample/*
-papers/_sample/*
-presentations/_sample/*
-scripts/_sample/*
-src/_sample/*
 
 ###############################################################################
 # Default
@@ -72,7 +39,7 @@ parts/
 sdist/
 var/
 wheels/
-*.egg-info/
+*.egg-info
 .installed.cfg
 *.egg
 MANIFEST
@@ -169,3 +136,4 @@ sftp-config\.json
 *.out
 *.fls
 *.fdb_latexmk
+/docs/api

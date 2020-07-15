@@ -1,18 +1,20 @@
 import numpy as np
-from galpy.util import bovy_conversion,bovy_coords
+from galpy.util import bovy_conversion, bovy_coords
 from galpy import potential
 import os
 
-import limepy
-from limepy import limepy,spes,sample
-#from ..community.limepy import *
+# import limepy
+# from limepy import limepy, spes, sample
+from ..extern.limepy import limepy, spes, sample
 
 from .cluster import StarCluster
 from .profiles import m_prof
 from .orbit import get_cluster_orbit
 
 
-def setup_cluster(ctype, units="realpc", origin="cluster", orbit=None,pot=None, **kwargs):
+def setup_cluster(
+    ctype, units="realpc", origin="cluster", orbit=None, pot=None, **kwargs
+):
     """
     NAME:
 
@@ -80,8 +82,8 @@ def setup_cluster(ctype, units="realpc", origin="cluster", orbit=None,pot=None, 
         elif ctype == "wilson":
             g = kwargs.pop("g", 2)
             cluster = get_limepy(g=g, **kwargs)
-        elif ctype=='galpy':
-            cluster=get_galpy(pot,**kwargs)
+        elif ctype == "galpy":
+            cluster = get_galpy(pot, **kwargs)
         else:
             source = kwargs.pop("source", "default")
             mbar = kwargs.pop("mbar", 0.4)
@@ -96,7 +98,9 @@ def setup_cluster(ctype, units="realpc", origin="cluster", orbit=None,pot=None, 
     # Add galpy orbit if given
     if orbit != None:
         cluster.orbit = orbit
-        t = (cluster.tphys / 1000.0) / bovy_conversion.time_in_Gyr(ro=8.0, vo=220.0)
+        t = (cluster.tphys / 1000.0) / bovy_conversion.time_in_Gyr(
+            ro=8.0, vo=220.0
+        )
         cluster.add_orbit(
             orbit.x(t),
             orbit.y(t),
@@ -247,21 +251,33 @@ def get_spes(**kwargs):
         M = float(kwargs.get("M"))
         if "rt" in kwargs:
             rt = float(kwargs.get("rt"))
-            smodel = spes(phi0, B=B, eta=eta, fpe=fpe, M=M, rt=rt, project=project)
+            smodel = spes(
+                phi0, B=B, eta=eta, fpe=fpe, M=M, rt=rt, project=project
+            )
         elif "rv" in kwargs:
             rv = float(kwargs.get("rv"))
-            smodel = spes(phi0, B=B, eta=eta, fpe=fpe, M=M, rv=rv, project=project)
+            smodel = spes(
+                phi0, B=B, eta=eta, fpe=fpe, M=M, rv=rv, project=project
+            )
         elif "rh" in kwargs:
             rh = float(kwargs.get("rh"))
-            smodel = spes(phi0, B=B, eta=eta, fpe=fpe, M=M, rh=rh, project=project)
+            smodel = spes(
+                phi0, B=B, eta=eta, fpe=fpe, M=M, rh=rh, project=project
+            )
         elif "r0" in kwargs:
             r0 = float(kwargs.get("r0"))
-            smodel = spes(phi0, B=B, eta=eta, fpe=fpe, M=M, r0=r0, project=project)
+            smodel = spes(
+                phi0, B=B, eta=eta, fpe=fpe, M=M, r0=r0, project=project
+            )
         else:
-            smodel = spes(phi0, B=B, eta=eta, fpe=fpe, M=M, r0=1.0, project=project)
+            smodel = spes(
+                phi0, B=B, eta=eta, fpe=fpe, M=M, r0=1.0, project=project
+            )
     else:
         units = "nbody"
-        smodel = spes(phi0, B=B, eta=eta, fpe=fpe, G=1, M=1, rv=1, project=project)
+        smodel = spes(
+            phi0, B=B, eta=eta, fpe=fpe, G=1, M=1, rv=1, project=project
+        )
 
     N = int(kwargs.get("N", 1000))
 
@@ -771,7 +787,9 @@ def w0_to_c(w0):
     return c_to_w0(w0, invert=True)
 
 
-def get_cluster(gcname="list", source="default", mbar=0.4, names=False, params=False):
+def get_cluster(
+    gcname="list", source="default", mbar=0.4, names=False, params=False
+):
     """
     NAME:
 
@@ -870,9 +888,9 @@ def get_cluster(gcname="list", source="default", mbar=0.4, names=False, params=F
                 source == "default" or "deboer" in source or "deBoer" in source
             ) and gcname in dname:
                 cluster = get_deBoer_cluster(ddata, gcname, mbar, names)
-            elif (source == "default" or "harris" in source or "Harris" in source) and (
-                gcname in hname or gcname in hname2
-            ):
+            elif (
+                source == "default" or "harris" in source or "Harris" in source
+            ) and (gcname in hname or gcname in hname2):
                 cluster = get_harris_cluster(hdata, gcname, mbar, names)
 
             if names and params:
@@ -896,15 +914,19 @@ def get_cluster(gcname="list", source="default", mbar=0.4, names=False, params=F
             if (
                 source == "default" or "deboer" in source or "deBoer" in source
             ) and name_list[i] in dname:
-                cluster.append(get_deBoer_cluster(ddata, name_list[i], mbar, names))
+                cluster.append(
+                    get_deBoer_cluster(ddata, name_list[i], mbar, names)
+                )
                 cluster[-1].ctype = name_list[i]
                 cluster_name.append(name_list[i])
                 cluster_mass.append(cluster[-1].mtot)
                 cluster_rm.append(cluster[-1].rm)
-            elif (source == "default" or "harris" in source or "Harris" in source) and (
-                name_list[i] in hname or name_list[i] in hname2
-            ):
-                cluster.append(get_harris_cluster(hdata, name_list[i], mbar, names))
+            elif (
+                source == "default" or "harris" in source or "Harris" in source
+            ) and (name_list[i] in hname or name_list[i] in hname2):
+                cluster.append(
+                    get_harris_cluster(hdata, name_list[i], mbar, names)
+                )
 
                 cluster[-1].ctype = name_list[i]
                 cluster_name.append(name_list[i])
@@ -1076,64 +1098,72 @@ def get_harris_cluster(data, gcname, mbar=0.4, names=False):
 
     return cluster
 
-def get_galpy(pot,**kwargs):
+
+def get_galpy(pot, **kwargs):
     N = int(kwargs.get("N", 1000))
-    rmin=kwargs.get('rmin',0.01)
-    rmax=kwargs.get('rmax',100.)
-    coordinates=kwargs.get('coordinates','cartesian')
-    ro=kwargs.get('ro',8.)
-    vo=kwargs.get('vo',220.)
+    rmin = kwargs.get("rmin", 0.01)
+    rmax = kwargs.get("rmax", 100.0)
+    coordinates = kwargs.get("coordinates", "cartesian")
+    ro = kwargs.get("ro", 8.0)
+    vo = kwargs.get("vo", 220.0)
 
-    x,y,z,vx,vy,vz=sample_galpy_potential(pot,N,rmin,rmax,ro=ro,vo=vo,coordinates=coordinates)
+    x, y, z, vx, vy, vz = sample_galpy_potential(
+        pot, N, rmin, rmax, ro=ro, vo=vo, coordinates=coordinates
+    )
 
-    mbar = kwargs.get("mbar", 1.)
-    m=np.ones(N)*mbar
+    mbar = kwargs.get("mbar", 1.0)
+    m = np.ones(N) * mbar
 
-    cluster = StarCluster(N, units='realkpc', origin="cluster")
+    cluster = StarCluster(N, units="realkpc", origin="cluster")
     cluster.ctype = "galpy"
     cluster.add_stars(
-        x,
-        y,
-        z,
-        vx,
-        vy,
-        vz,
-        np.linspace(1, N, N, dtype=int),
-        m,
+        x, y, z, vx, vy, vz, np.linspace(1, N, N, dtype=int), m,
     )
     cluster.find_centre()
     cluster.key_params()
 
     return cluster
 
-def sample_galpy_potential(pot,n,rmin,rmax,ro=8.,vo=220.,coordinates='cartesian'):
-    ran=np.random.rand(n)
-    rad=np.linspace(rmin,rmax,n)
-    
+
+def sample_galpy_potential(
+    pot, n, rmin, rmax, ro=8.0, vo=220.0, coordinates="cartesian"
+):
+    ran = np.random.rand(n)
+    rad = np.linspace(rmin, rmax, n)
+
     try:
-        menc=pot.mass(rad/ro,z=0,t=0,forceint=False)
+        menc = pot.mass(rad / ro, z=0, t=0, forceint=False)
     except:
-        vc= potential.vcirc(pot,rad/ro,phi=0,t=0.,ro=ro,vo=vo,use_physical=False)
-        menc=vc**2.*(rad/ro)
+        vc = potential.vcirc(
+            pot, rad / ro, phi=0, t=0.0, ro=ro, vo=vo, use_physical=False
+        )
+        menc = vc ** 2.0 * (rad / ro)
 
-    menc*=bovy_conversion.mass_in_msol(ro=ro,vo=vo)       
-    
-    r=np.interp(ran, menc/menc[-1], rad)
-    phi=2.0*np.pi*np.random.rand(n)
-    theta=np.arccos(1.0-2.0*np.random.rand(n))
-    
-    x=r*np.sin(theta)*np.cos(phi)
-    y=r*np.sin(theta)*np.sin(phi)
-    z=r*np.cos(theta)
-    
-    sigma_v_1d=vo*potential.vcirc(pot,rad/ro,phi=0,t=0.,ro=ro,vo=vo,use_physical=False)/np.sqrt(3.)
+    menc *= bovy_conversion.mass_in_msol(ro=ro, vo=vo)
 
-    vx=np.random.normal(0.,sigma_v_1d,n)        
-    vy=np.random.normal(0.,sigma_v_1d,n)        
-    vz=np.random.normal(0.,sigma_v_1d,n) 
-    
-    if coordinates=='spherical':
-        vr = (vx * np.sin(theta) * np.cos(phi)
+    r = np.interp(ran, menc / menc[-1], rad)
+    phi = 2.0 * np.pi * np.random.rand(n)
+    theta = np.arccos(1.0 - 2.0 * np.random.rand(n))
+
+    x = r * np.sin(theta) * np.cos(phi)
+    y = r * np.sin(theta) * np.sin(phi)
+    z = r * np.cos(theta)
+
+    sigma_v_1d = (
+        vo
+        * potential.vcirc(
+            pot, rad / ro, phi=0, t=0.0, ro=ro, vo=vo, use_physical=False
+        )
+        / np.sqrt(3.0)
+    )
+
+    vx = np.random.normal(0.0, sigma_v_1d, n)
+    vy = np.random.normal(0.0, sigma_v_1d, n)
+    vz = np.random.normal(0.0, sigma_v_1d, n)
+
+    if coordinates == "spherical":
+        vr = (
+            vx * np.sin(theta) * np.cos(phi)
             + vy * np.sin(theta) * np.sin(phi)
             + vz * np.cos(theta)
         )
@@ -1143,12 +1173,12 @@ def sample_galpy_potential(pot,n,rmin,rmax,ro=8.,vo=220.,coordinates='cartesian'
             - vz * np.sin(theta)
         )
         vphi = vx * -np.sin(phi) + vy * np.cos(phi)
-        
-        x,y,z=r,phi,theta
-        vx,vy,vz=vr,vphi,vtheta
-        
-    elif coordinates=='cylindrical':
-        x,y,z=bovy_coords.rect_to_cyl(x,y,z)
-        vx,vy,vz=bovy_coords.rect_to_cyl_vec(vx,vy,vz,x,y,z,True)
-    
-    return x,y,z,vx,vy,vz
+
+        x, y, z = r, phi, theta
+        vx, vy, vz = vr, vphi, vtheta
+
+    elif coordinates == "cylindrical":
+        x, y, z = bovy_coords.rect_to_cyl(x, y, z)
+        vx, vy, vz = bovy_coords.rect_to_cyl_vec(vx, vy, vz, x, y, z, True)
+
+    return x, y, z, vx, vy, vz

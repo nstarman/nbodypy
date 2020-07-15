@@ -116,11 +116,17 @@ def load_cluster(
     elif ctype == "gyrfalcon":
         # Read in snapshot from gyrfalcon.
         filein = open(wdir + filename, "r")
-        cluster = get_gyrfalcon(filein, "WDunits", "galaxy", advance=False, **kwargs)
+        cluster = get_gyrfalcon(
+            filein, "WDunits", "galaxy", advance=False, **kwargs
+        )
     elif ctype == "snaptrim":
         # Read in snaptrim snapshot from gyrfalcon.
         cluster = get_snaptrim(
-            filename=filename, units="WDunits", origin="galaxy", advance=False, **kwargs
+            filename=filename,
+            units="WDunits",
+            origin="galaxy",
+            advance=False,
+            **kwargs
         )
     elif ctype == "nbodypy":
         # Read in standard nbodypy snapshot
@@ -134,7 +140,9 @@ def load_cluster(
         )
     elif ctype == "snapshot":
         # Read in standard generic snapshot
-        col_names = kwargs.pop("col_names", ["m", "x", "y", "z", "vx", "vy", "vz"])
+        col_names = kwargs.pop(
+            "col_names", ["m", "x", "y", "z", "vx", "vy", "vz"]
+        )
         col_nums = kwargs.pop("col_nums", [0, 1, 2, 3, 4, 5, 6])
         cluster = get_snapshot(
             filename=filename,
@@ -161,7 +169,9 @@ def load_cluster(
     if orbit != None:
         cluster.orbit = orbit
         if cluster.units == "realpc":
-            t = (cluster.tphys / 1000.0) / bovy_conversion.time_in_Gyr(ro=8.0, vo=220.0)
+            t = (cluster.tphys / 1000.0) / bovy_conversion.time_in_Gyr(
+                ro=8.0, vo=220.0
+            )
             cluster.add_orbit(
                 orbit.x(t) * 1000.0,
                 orbit.y(t) * 1000.0,
@@ -180,9 +190,9 @@ def load_cluster(
                 orbit.vz(t),
             )
         elif cluster.units == "nbody":
-            t = (cluster.tphys * cluster.tstar / 1000.0) / bovy_conversion.time_in_Gyr(
-                ro=8.0, vo=220.0
-            )
+            t = (
+                cluster.tphys * cluster.tstar / 1000.0
+            ) / bovy_conversion.time_in_Gyr(ro=8.0, vo=220.0)
             cluster.add_orbit(
                 orbit.x(t) * 1000.0 / cluster.rbar,
                 orbit.y(t) * 1000.0 / cluster.rbar,
@@ -253,7 +263,11 @@ def advance_cluster(cluster, ofile=None, orbit=None, filename=None, **kwargs):
     # Continue reading in cluster opened in get_cluster()
     if cluster.ctype == "nbody6se":
         cluster = get_nbody6_jarrod(
-            cluster.bfile, cluster.sfile, ofile=ofile, advance=True, **advance_kwargs
+            cluster.bfile,
+            cluster.sfile,
+            ofile=ofile,
+            advance=True,
+            **advance_kwargs
         )
     elif cluster.ctype == "nbody6":
         cluster = get_nbody6_out(
@@ -297,7 +311,9 @@ def advance_cluster(cluster, ofile=None, orbit=None, filename=None, **kwargs):
             **advance_kwargs
         )
     elif cluster.ctype == "snapshot":
-        col_names = kwargs.pop("col_names", ["m", "x", "y", "z", "vx", "vy", "vz"])
+        col_names = kwargs.pop(
+            "col_names", ["m", "x", "y", "z", "vx", "vy", "vz"]
+        )
         col_nums = kwargs.pop("col_nums", [0, 1, 2, 3, 4, 5, 6])
 
         cluster = get_snapshot(
@@ -317,7 +333,7 @@ def advance_cluster(cluster, ofile=None, orbit=None, filename=None, **kwargs):
 
     # Check for restart
     if cluster.ntot == 0.0:
-        print('NTOT = 0',cluster.wdir,advance_kwargs.get('wdir','./'))
+        print("NTOT = 0", cluster.wdir, advance_kwargs.get("wdir", "./"))
         try:
             wdir = cluster.wdir + "cont/"
         except:
@@ -331,7 +347,7 @@ def advance_cluster(cluster, ofile=None, orbit=None, filename=None, **kwargs):
             ofile = None
 
         if os.path.exists(wdir):
-            old_wdir=advance_kwargs.pop('wdir')
+            old_wdir = advance_kwargs.pop("wdir")
             cluster = load_cluster(
                 ctype=cluster.ctype, ofile=ofile, wdir=wdir, **advance_kwargs
             )
@@ -549,7 +565,12 @@ def get_kwtype(cluster, kwfile):
 
 # Get StarCluster from Gyrfalcon output
 def get_gyrfalcon(
-    filein, units="WDunits", origin="galaxy", ofile=None, advance=False, **kwargs
+    filein,
+    units="WDunits",
+    origin="galaxy",
+    ofile=None,
+    advance=False,
+    **kwargs
 ):
     """
     NAME:
@@ -617,7 +638,7 @@ def get_gyrfalcon(
             break
         if len(data) == 0:
             print("END OF FILE")
-            return StarCluster(0,0.0,ctype="gyrfalcon",**kwargs)
+            return StarCluster(0, 0.0, ctype="gyrfalcon", **kwargs)
         if any("Ntot" in dat for dat in data):
             sntot = data[2]
             ntot = int(sntot[:-1])
@@ -663,7 +684,7 @@ def get_gyrfalcon(
             get_cluster_orbit(cluster, ofile, advance=advance, **kwargs)
 
         if kwargs.get("do_key_params", True):
-            do_order=kwargs.get("do_key_params", True)
+            do_order = kwargs.get("do_key_params", True)
             cluster.to_cluster()
             cluster.find_centre()
             cluster.to_centre(do_key_params=True, do_order=do_order)
@@ -673,7 +694,12 @@ def get_gyrfalcon(
 
 
 def get_snaptrim(
-    filename=None, units="WDunits", origin="galaxy", ofile=None, advance=False, **kwargs
+    filename=None,
+    units="WDunits",
+    origin="galaxy",
+    ofile=None,
+    advance=False,
+    **kwargs
 ):
     """
     NAME:
@@ -728,15 +754,18 @@ def get_snaptrim(
             )
         elif os.path.isfile("%s%s" % (wdir, filename)):
             data = np.loadtxt(
-                "%s%s" % (wdir, filename), delimiter=delimiter, skiprows=skiprows
+                "%s%s" % (wdir, filename),
+                delimiter=delimiter,
+                skiprows=skiprows,
             )
         else:
             print("NO FILE FOUND: %s, %s, %s" % (wdir, snapdir, filename))
-            cluster = StarCluster(0, 0.0, ctype='snaptrim', **kwargs)
+            cluster = StarCluster(0, 0.0, ctype="snaptrim", **kwargs)
             print(cluster.ntot)
             return cluster
     elif os.path.isfile(
-        "%s%s%s%s%s" % (wdir, snapdir, snapbase, str(nsnap).zfill(nzfill), snapend)
+        "%s%s%s%s%s"
+        % (wdir, snapdir, snapbase, str(nsnap).zfill(nzfill), snapend)
     ):
         filename = "%s%s%s%s%s" % (
             wdir,
@@ -748,7 +777,12 @@ def get_snaptrim(
     elif os.path.isfile(
         "%s%s%s%s" % (wdir, snapbase, str(nsnap).zfill(nzfill), snapend)
     ):
-        filename = "%s%s%s%s" % (wdir, snapbase, str(nsnap).zfill(nzfill), snapend)
+        filename = "%s%s%s%s" % (
+            wdir,
+            snapbase,
+            str(nsnap).zfill(nzfill),
+            snapend,
+        )
     else:
         print(
             "NO FILE FOUND - %s%s%s%s%s"
@@ -761,7 +795,9 @@ def get_snaptrim(
             str(nsnap).zfill(nzfill),
             snapend,
         )
-        cluster = StarCluster(0, 0.,ctype='snaptrim', sfile=filename, **kwargs)
+        cluster = StarCluster(
+            0, 0.0, ctype="snaptrim", sfile=filename, **kwargs
+        )
         print(cluster.ntot)
         return cluster
 
@@ -777,7 +813,7 @@ def get_snaptrim(
             break
         if len(data) == 0:
             print("END OF FILE")
-            return StarCluster(0, 0.0, ctype="snaptrim",**kwargs)
+            return StarCluster(0, 0.0, ctype="snaptrim", **kwargs)
         if any("Ntot" in dat for dat in data):
             sntot = data[2]
             ntot = int(sntot[:-1])
@@ -843,7 +879,7 @@ def get_nbody6_jarrod(fort82, fort83, ofile=None, advance=False, **kwargs):
     line1 = fort83.readline().split()
     if len(line1) == 0:
         print("END OF FILE")
-        return StarCluster(0, 0.0,ctype='nbody6se',**kwargs)
+        return StarCluster(0, 0.0, ctype="nbody6se", **kwargs)
 
     line2 = fort83.readline().split()
     line3 = fort83.readline().split()
@@ -917,8 +953,8 @@ def get_nbody6_jarrod(fort82, fort83, ofile=None, advance=False, **kwargs):
         kw.append(max(kw1[-1], kw2[-1]))
         kcm.append(float(data[4]))
         ecc.append(float(data[5]))
-        pb.append(10.0**float(data[6]))
-        semi.append(10.0**float(data[7]))
+        pb.append(10.0 ** float(data[6]))
+        semi.append(10.0 ** float(data[7]))
         m1.append(float(data[8]) / zmbar)
         m2.append(float(data[9]) / zmbar)
         m.append(m1[-1] + m2[-1])
@@ -1026,7 +1062,7 @@ def get_nbody6_jarrod(fort82, fort83, ofile=None, advance=False, **kwargs):
             get_cluster_orbit(cluster, ofile, advance=advance, **kwargs)
 
         if kwargs.get("do_key_params", True):
-            do_order=kwargs.get("do_order", True)
+            do_order = kwargs.get("do_order", True)
             # Estimate centre
             cluster.find_centre()
             cluster.to_centre(do_key_params=True, do_order=do_order)
@@ -1076,7 +1112,7 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
     line1 = out34.readline().split()
     if len(line1) == 0:
         print("END OF FILE")
-        return StarCluster(0, 0.0, ctype='nbody6',**kwargs)
+        return StarCluster(0, 0.0, ctype="nbody6", **kwargs)
 
     line2 = out34.readline().split()
     line3 = out34.readline().split()
@@ -1095,7 +1131,9 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
         line3b = out9.readline().split()
 
         if nb != int(line1b[0]):
-            print("ERROR: NUMBER OF BINARIES DO NOT MATCH - ",nb,int(line1b[0]))
+            print(
+                "ERROR: NUMBER OF BINARIES DO NOT MATCH - ", nb, int(line1b[0])
+            )
 
     nc = int(line2[0])
     rc = max(float(line2[1]), 0.01)
@@ -1159,8 +1197,8 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
         for i in range(0, nb):
             data = out9.readline().split()
 
-            #Ignore massless ghost particles ouput by NBODY6
-            if (float(data[4])+float(data[5])) > 0:
+            # Ignore massless ghost particles ouput by NBODY6
+            if (float(data[4]) + float(data[5])) > 0:
 
                 nbbnd += 1
 
@@ -1192,7 +1230,7 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
                 vy2 = float(data[22])
                 vz2 = float(data[23])
 
-                ''' It seems binary COM information is included in OUT34
+                """ It seems binary COM information is included in OUT34
                 x.append((x1 * m1[-1] + x2 * m2[-1]) / (m1[-1] + m2[-1]) + xc)
                 y.append((y1 * m1[-1] + y2 * m2[-1]) / (m1[-1] + m2[-1]) + yc)
                 z.append((z1 * m1[-1] + z2 * m2[-1]) / (m1[-1] + m2[-1]) + zc)
@@ -1208,10 +1246,10 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
 
                 r1 = np.sqrt((x1 - x[-1]) ** 2.0 + (y1 - y[-1]) ** 2.0 + (z1 - z[-1]) ** 2.0)
                 r2 = np.sqrt((x2 - x[-1]) ** 2.0 + (y2 - y[-1]) ** 2.0 + (z2 - z[-1]) ** 2.0)
-                '''
-                mb=(m1[-1] + m2[-1])
+                """
+                mb = m1[-1] + m2[-1]
 
-                semi.append((pb[-1]**2.*mb)**(1./3.))
+                semi.append((pb[-1] ** 2.0 * mb) ** (1.0 / 3.0))
 
     data = out34.readline().split()
 
@@ -1245,7 +1283,7 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
             nsbnd += 1
         data = out34.readline().split()
 
-        if len(data)==0:
+        if len(data) == 0:
             break
 
     nbnd = nsbnd + nbbnd
@@ -1261,7 +1299,19 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
         **kwargs
     )
     cluster.add_nbody6(
-        nc, rc, rbar, rtide, xc, yc, zc, zmbar, vstar, rscale, nsbnd, nbbnd, n_p
+        nc,
+        rc,
+        rbar,
+        rtide,
+        xc,
+        yc,
+        zc,
+        zmbar,
+        vstar,
+        rscale,
+        nsbnd,
+        nbbnd,
+        n_p,
     )
     # Add back on the centre of mass which has been substracted off by NBODY6
     cluster.add_stars(x, y, z, vx, vy, vz, m, i_d)
@@ -1269,11 +1319,24 @@ def get_nbody6_out(out9, out34, advance=False, **kwargs):
     cluster.add_energies(kin, pot, etot)
     if out9 != None:
         cluster.add_bse(
-            id1, id2, kw1, kw2, kcm, ecc, pb, semi, m1, m2, logl1, logl2, logr1, logr2
+            id1,
+            id2,
+            kw1,
+            kw2,
+            kcm,
+            ecc,
+            pb,
+            semi,
+            m1,
+            m2,
+            logl1,
+            logl2,
+            logr1,
+            logr2,
         )
 
     if kwargs.get("do_key_params", True):
-        do_order=kwargs.get("do_key_params", True)
+        do_order = kwargs.get("do_key_params", True)
         # Estimate centre of distribution
         cluster.find_centre()
         cluster.to_centre(do_key_params=True, do_order=do_order)
@@ -1318,7 +1381,7 @@ def get_nbody6_out34(out34, advance=False, **kwargs):
     line1 = out34.readline().split()
     if len(line1) == 0:
         print("END OF FILE")
-        return StarCluster(0, 0.0, ctype='nbody6',**kwargs)
+        return StarCluster(0, 0.0, ctype="nbody6", **kwargs)
 
     line2 = out34.readline().split()
     line3 = out34.readline().split()
@@ -1411,7 +1474,19 @@ def get_nbody6_out34(out34, advance=False, **kwargs):
         **kwargs
     )
     cluster.add_nbody6(
-        nc, rc, rbar, rtide, xc, yc, zc, zmbar, vstar, rscale, nsbnd, nbbnd, n_p
+        nc,
+        rc,
+        rbar,
+        rtide,
+        xc,
+        yc,
+        zc,
+        zmbar,
+        vstar,
+        rscale,
+        nsbnd,
+        nbbnd,
+        n_p,
     )
     # Add back on the centre of mass which has been substracted off by NBODY6
     cluster.add_stars(x + xc, y + yc, z + zc, vx, vy, vz, m, i_d)
@@ -1419,7 +1494,7 @@ def get_nbody6_out34(out34, advance=False, **kwargs):
     cluster.add_energies(kin, pot, etot)
 
     if kwargs.get("do_key_params", True):
-        do_order=kwargs.get("do_key_params", True)
+        do_order = kwargs.get("do_key_params", True)
 
         # Estimate centre of distribution using median function
         cluster.find_centre()
@@ -1513,15 +1588,18 @@ def get_snapshot(
             )
         elif os.path.isfile("%s%s" % (wdir, filename)):
             data = np.loadtxt(
-                "%s%s" % (wdir, filename), delimiter=delimiter, skiprows=skiprows
+                "%s%s" % (wdir, filename),
+                delimiter=delimiter,
+                skiprows=skiprows,
             )
         else:
             print("NO FILE FOUND: %s, %s, %s" % (wdir, snapdir, filename))
-            cluster = StarCluster(0, 0., ctype=ctype, **kwargs)
+            cluster = StarCluster(0, 0.0, ctype=ctype, **kwargs)
             print(cluster.ntot)
             return cluster
     elif os.path.isfile(
-        "%s%s%s%s%s" % (wdir, snapdir, snapbase, str(nsnap).zfill(nzfill), snapend)
+        "%s%s%s%s%s"
+        % (wdir, snapdir, snapbase, str(nsnap).zfill(nzfill), snapend)
     ):
         filename = "%s%s%s%s%s" % (
             wdir,
@@ -1541,7 +1619,12 @@ def get_snapshot(
     elif os.path.isfile(
         "%s%s%s%s" % (wdir, snapbase, str(nsnap).zfill(nzfill), snapend)
     ):
-        filename = "%s%s%s%s" % (wdir, snapbase, str(nsnap).zfill(nzfill), snapend)
+        filename = "%s%s%s%s" % (
+            wdir,
+            snapbase,
+            str(nsnap).zfill(nzfill),
+            snapend,
+        )
         data = np.loadtxt(
             ("%s%s%s%s" % (wdir, snapbase, str(nsnap).zfill(nzfill), snapend)),
             delimiter=delimiter,
@@ -1559,7 +1642,7 @@ def get_snapshot(
             str(nsnap).zfill(nzfill),
             snapend,
         )
-        cluster = StarCluster(0, 0., ctype=ctype, **kwargs)
+        cluster = StarCluster(0, 0.0, ctype=ctype, **kwargs)
         print(cluster.ntot)
         return cluster
 
@@ -1606,7 +1689,7 @@ def get_snapshot(
             get_cluster_orbit(cluster, ofile, advance=advance, **kwargs)
 
         if kwargs.get("do_key_params", True):
-            do_order=kwargs.get("do_key_params", True)
+            do_order = kwargs.get("do_key_params", True)
 
             cluster.to_cluster()
             cluster.find_centre()
@@ -1615,7 +1698,7 @@ def get_snapshot(
 
     elif origin == "cluster":
         if kwargs.get("do_key_params", True):
-            do_order=kwargs.get("do_key_params", True)
+            do_order = kwargs.get("do_key_params", True)
             # Estimate centre of distribution
             cluster.find_centre()
             cluster.to_centre(do_key_params=True, do_order=do_order)
@@ -1628,7 +1711,12 @@ def get_snapshot(
 
 
 def get_nbody6_snapauto(
-    filename=None, units="realpc", origin="cluster", ofile=None, advance=False, **kwargs
+    filename=None,
+    units="realpc",
+    origin="cluster",
+    ofile=None,
+    advance=False,
+    **kwargs
 ):
     """
     NAME:
@@ -1681,7 +1769,12 @@ def get_nbody6_snapauto(
 
 
 def get_nbodypy_snapshot(
-    filename=None, units="realpc", origin="cluster", ofile=None, advance=False, **kwargs
+    filename=None,
+    units="realpc",
+    origin="cluster",
+    ofile=None,
+    advance=False,
+    **kwargs
 ):
     """
     NAME:
@@ -1806,7 +1899,7 @@ def get_amuse_particles(
             get_cluster_orbit(cluster, ofile, advance=advance, **kwargs)
 
         if kwargs.get("do_key_params", True):
-            do_order=kwargs.get("do_key_params", True)
+            do_order = kwargs.get("do_key_params", True)
             cluster.to_cluster()
             cluster.find_centre()
             cluster.to_centre(do_key_params=True, do_order=do_order)
@@ -1814,7 +1907,7 @@ def get_amuse_particles(
 
     elif origin == "cluster":
         if kwargs.get("do_key_params", True):
-            do_order=kwargs.get("do_key_params", True)
+            do_order = kwargs.get("do_key_params", True)
             # Estimate centre of distribution
             cluster.find_centre()
             cluster.to_centre(do_key_params=True, do_order=do_order)

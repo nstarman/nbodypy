@@ -11,15 +11,16 @@ from galpy.util import bovy_coords, bovy_conversion
 from galpy import potential
 from galpy.potential import LogarithmicHaloPotential, MWPotential2014, rtide
 from galpy.actionAngle import actionAngleStaeckel
-from galpy.actionAngle.actionAngleIsochroneApprox import actionAngleIsochroneApprox
+from galpy.actionAngle.actionAngleIsochroneApprox import (
+    actionAngleIsochroneApprox,
+)
 
 # PROJECT-SPECIFIC
 from ..data import get_data_orbits
-from ..util.recipes import rotate, interpolate, binmaker
+from ..utils.recipes import rotate, interpolate, binmaker
 from .operations import save_cluster, return_cluster
 from .profiles import rho_prof
-from ..util.plots import *
-
+from ..utils.plots import *
 
 
 def initialize_orbit(cluster, from_centre=False, r0=8.0, v0=220.0):
@@ -87,14 +88,15 @@ def initialize_orbit(cluster, from_centre=False, r0=8.0, v0=220.0):
         R, phi, z = bovy_coords.rect_to_cyl(x, y, z)
         vR, vT, vz = bovy_coords.rect_to_cyl_vec(vx, vy, vz, x, y, z)
         o = Orbit(
-            [R, vR, vT, z, vz, phi], ro=r0, vo=v0, solarmotion=[-11.1, 24.0, 7.25]
+            [R, vR, vT, z, vz, phi],
+            ro=r0,
+            vo=v0,
+            solarmotion=[-11.1, 24.0, 7.25],
         )
-        
+
         return_cluster(cluster, units0, origin0)
 
-
     cluster.orbit = o
-
 
     return o
 
@@ -146,7 +148,13 @@ def initialize_orbits(cluster, r0=8.0, v0=220.0):
 
 
 def integrate_orbit(
-    cluster, pot=MWPotential2014, tfinal=12.0, nt=1000, r0=8.0, v0=220.0, plot=False
+    cluster,
+    pot=MWPotential2014,
+    tfinal=12.0,
+    nt=1000,
+    r0=8.0,
+    v0=220.0,
+    plot=False,
 ):
     """
     NAME:
@@ -406,12 +414,19 @@ def orbital_path(
     """
     o = initialize_orbit(cluster, from_centre=from_centre)
 
-    ts = np.linspace(0, -1.0 * dt / bovy_conversion.time_in_Gyr(ro=r0, vo=v0), nt)
+    ts = np.linspace(
+        0, -1.0 * dt / bovy_conversion.time_in_Gyr(ro=r0, vo=v0), nt
+    )
     o.integrate(ts, pot)
 
     R, phi, z = bovy_coords.rect_to_cyl(o.x(ts[-1]), o.y(ts[-1]), o.z(ts[-1]))
     vR, vT, vz = bovy_coords.rect_to_cyl_vec(
-        o.vx(ts[-1]), o.vy(ts[-1]), o.vz(ts[-1]), o.x(ts[-1]), o.y(ts[-1]), o.z(ts[-1])
+        o.vx(ts[-1]),
+        o.vy(ts[-1]),
+        o.vz(ts[-1]),
+        o.x(ts[-1]),
+        o.y(ts[-1]),
+        o.z(ts[-1]),
     )
     o = Orbit(
         [R / r0, vR / v0, vT / v0, z / r0, vz / v0, phi],
@@ -609,7 +624,9 @@ def orbital_path_match(
             mag_ovec = np.sqrt(dxo ** 2.0 + dyo ** 2.0 + dzo ** 2.0)
             svec = np.column_stack([dx[:, indx], dy[:, indx], dz[:, indx]])
             mag_svec = dr[:, indx]
-            theta = np.arccos(np.dot(ovec[indx], svec) / (mag_ovec[indx] * mag_svec))
+            theta = np.arccos(
+                np.dot(ovec[indx], svec) / (mag_ovec[indx] * mag_svec)
+            )
             dpath = mag_svec * np.sin(theta)
         else:
             # Need to optimize this via numba
@@ -617,7 +634,9 @@ def orbital_path_match(
             for i in range(0, cluster.ntot):
                 ovec = [dxo[indx[i]], dyo[indx[i]], dzo[indx[i]]]
                 mag_ovec = np.sqrt(
-                    dxo[indx[i]] ** 2.0 + dyo[indx[i]] ** 2.0 + dzo[indx[i]] ** 2.0
+                    dxo[indx[i]] ** 2.0
+                    + dyo[indx[i]] ** 2.0
+                    + dzo[indx[i]] ** 2.0
                 )
 
                 svec = [dx[i, indx[i]], dy[i, indx[i]], dz[i, indx[i]]]
@@ -652,7 +671,13 @@ def orbital_path_match(
 
 
 def stream_path(
-    cluster, dt=0.1, nt=100, pot=MWPotential2014, from_centre=False, r0=8.0, v0=220.0
+    cluster,
+    dt=0.1,
+    nt=100,
+    pot=MWPotential2014,
+    from_centre=False,
+    r0=8.0,
+    v0=220.0,
 ):
     """
     NAME:
@@ -703,7 +728,13 @@ def stream_path(
         v0=v0,
     )
     tstar, dprog, dpath = orbital_path_match(
-        cluster=cluster, dt=dt, nt=nt, pot=pot, from_centre=from_centre, r0=r0, v0=v0
+        cluster=cluster,
+        dt=dt,
+        nt=nt,
+        pot=pot,
+        from_centre=from_centre,
+        r0=r0,
+        v0=v0,
     )
 
     t_lower, t_mid, t_upper, t_hist = binmaker(to, nbin=nt)
@@ -833,7 +864,9 @@ def stream_path_match(
             mag_ovec = np.sqrt(dxo ** 2.0 + dyo ** 2.0 + dzo ** 2.0)
             svec = np.column_stack([dx[:, indx], dy[:, indx], dz[:, indx]])
             mag_svec = dr[:, indx]
-            theta = np.arccos(np.dot(ovec[indx], svec) / (mag_ovec[indx] * mag_svec))
+            theta = np.arccos(
+                np.dot(ovec[indx], svec) / (mag_ovec[indx] * mag_svec)
+            )
             dpath = mag_svec * np.sin(theta)
         else:
             # Need to optimize this via numba
@@ -841,7 +874,9 @@ def stream_path_match(
             for i in range(0, cluster.ntot):
                 ovec = [dxo[indx[i]], dyo[indx[i]], dzo[indx[i]]]
                 mag_ovec = np.sqrt(
-                    dxo[indx[i]] ** 2.0 + dyo[indx[i]] ** 2.0 + dzo[indx[i]] ** 2.0
+                    dxo[indx[i]] ** 2.0
+                    + dyo[indx[i]] ** 2.0
+                    + dzo[indx[i]] ** 2.0
                 )
 
                 svec = [dx[i, indx[i]], dy[i, indx[i]], dz[i, indx[i]]]
@@ -929,7 +964,7 @@ def rtidal(
         z = cluster.zgc
 
     # Calculate rtide
-    rt = rtide(pot, R, z, M=cluster.mtot,use_physical=False)
+    rt = rtide(pot, R, z, M=cluster.mtot, use_physical=False)
     nit = 0
     for i in range(0, rtiterate):
         msum = 0.0
@@ -937,7 +972,7 @@ def rtidal(
         indx = cluster.r < rt
         msum = np.sum(cluster.m[indx])
 
-        rtnew = rtide(pot, R, z, M=msum,use_physical=False)
+        rtnew = rtide(pot, R, z, M=msum, use_physical=False)
 
         if verbose:
             print(rt, rtnew, rtnew / rt, msum / cluster.mtot)
@@ -1012,7 +1047,7 @@ def rlimiting(
 
     KWARGS:
 
-       Same as ..util.plots.nplot
+       Same as ..utils.plots.nplot
 
     OUTPUT:
 
@@ -1027,7 +1062,6 @@ def rlimiting(
 
     cluster.to_centre()
     cluster.to_galpy()
-
 
     if rgc != None:
         R = rgc / r0
@@ -1100,8 +1134,12 @@ def rlimiting(
                 yunits = " Msun/pc^3"
         elif cluster.units == "realkpc":
             rprof *= r0
-            pprof *= bovy_conversion.dens_in_msolpc3(ro=r0, vo=v0) * (1000.0 ** 3.0)
-            rho_local *= bovy_conversion.dens_in_msolpc3(ro=r0, vo=v0) * (1000.0 ** 3.0)
+            pprof *= bovy_conversion.dens_in_msolpc3(ro=r0, vo=v0) * (
+                1000.0 ** 3.0
+            )
+            rho_local *= bovy_conversion.dens_in_msolpc3(ro=r0, vo=v0) * (
+                1000.0 ** 3.0
+            )
 
             xunits = " (kpc)"
             if projected:
@@ -1231,13 +1269,24 @@ def get_cluster_orbit(gcname="list", names=False, r0=8.0, v0=220.0):
             pmdec[indx][0],
             vlos[indx][0],
         ]
-        o = Orbit(vxvv, ro=r0, vo=v0, radec=True, solarmotion=[-11.1, 24.0, 7.25])
+        o = Orbit(
+            vxvv, ro=r0, vo=v0, radec=True, solarmotion=[-11.1, 24.0, 7.25]
+        )
         oname = name[indx]
     else:
         vxvv = np.column_stack(
-            [ra[indx], dec[indx], dist[indx], pmra[indx], pmdec[indx], vlos[indx]]
+            [
+                ra[indx],
+                dec[indx],
+                dist[indx],
+                pmra[indx],
+                pmdec[indx],
+                vlos[indx],
+            ]
         )
-        o = Orbit(vxvv, radec=True, ro=r0, vo=v0, solarmotion=[-11.1, 24.0, 7.25])
+        o = Orbit(
+            vxvv, radec=True, ro=r0, vo=v0, solarmotion=[-11.1, 24.0, 7.25]
+        )
         oname = name[indx]
 
     if names:

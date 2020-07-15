@@ -12,7 +12,7 @@ __author__ = "Jeremy Webb"
 # IMPORTS
 
 import numpy as np
-from ..util.recipes import rotate
+from ..utils.recipes import rotate
 from galpy.util import bovy_conversion
 
 

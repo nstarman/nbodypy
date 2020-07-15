@@ -5,13 +5,22 @@ The StarCluster classes and key internal functions
 
 """
 import numpy as np
-from galpy.util import _rotate_to_arbitrary_vector, bovy_conversion, bovy_coords
+from galpy.util import (
+    _rotate_to_arbitrary_vector,
+    bovy_conversion,
+    bovy_coords,
+)
 from textwrap import dedent
 from galpy.potential import MWPotential2014
 from .orbit import rtidal, rlimiting, initialize_orbit, calc_actions
 from .functions import *
 from .profiles import *
 from copy import copy
+
+
+__all__ = [
+    "sub_cluster",
+]
 
 
 class TestDocStringCluster(object):
@@ -216,14 +225,22 @@ class StarCluster(object):
     after id, masses, position, and velocities have been read in from a
     snapshot in clustercentric coordinates
 
-    >>> cluster=Starcluster(units='realpc',origin='cluster',ctype='snapshot')
-    >>> cluster.add_stars(x,y,z,vx,vy,vz,m,id)
-    >>> print(cluster.rm)
-    10.0
+    .. code-block:: python
+
+        cluster=StarCluster(units='realpc',origin='cluster',ctype='snapshot')
+        cluster.add_stars(x,y,z,vx,vy,vz,m,id)
+        print(cluster.rm)
+
     """
-    
+
     def __init__(
-        self, ntot=0, tphys=0.0, units=None, origin=None, ctype="snapshot", **kwargs
+        self,
+        ntot=0,
+        tphys=0.0,
+        units=None,
+        origin=None,
+        ctype="snapshot",
+        **kwargs
     ):
 
         # Total Number of Stars + Binaries in the cluster
@@ -431,7 +448,17 @@ class StarCluster(object):
         self.np = np
 
     def add_stars(
-        self, x, y, z, vx, vy, vz,m=None,id=None,do_key_params=False, do_order=False
+        self,
+        x,
+        y,
+        z,
+        vx,
+        vy,
+        vz,
+        m=None,
+        id=None,
+        do_key_params=False,
+        do_order=False,
     ):
         """
         NAME:
@@ -480,7 +507,7 @@ class StarCluster(object):
         self.vz = np.append(self.vz, np.asarray(vz))
 
         if m is None:
-            self.m = np.append(self.m, np.ones(len(x),float))
+            self.m = np.append(self.m, np.ones(len(x), float))
         else:
             self.m = np.append(self.m, np.asarray(m))
 
@@ -548,7 +575,7 @@ class StarCluster(object):
             self.key_params(do_order=do_order)
 
         if len(self.id) != self.ntot:
-            print('Number Error:',len(self.id),self.ntot)
+            print("Number Error:", len(self.id), self.ntot)
             print("Added %i stars to instance" % (len(self.id) - self.ntot))
             self.ntot = len(self.id)
 
@@ -679,7 +706,7 @@ class StarCluster(object):
             self.ospin1 = np.asarray(ospin1)
             self.ospin2 = np.asarray(ospin2)
 
-        self.eb=0.5*self.m1*self.m2/self.semi
+        self.eb = 0.5 * self.m1 * self.m2 / self.semi
 
     def add_energies(self, kin, pot, etot):
         """
@@ -1074,7 +1101,7 @@ class StarCluster(object):
             self.xc, self.yc, self.zc = xc, yc, zc
             self.vxc, self.vyc, self.vzc = vxc, vyc, vzc
 
-        if self.origin == "galaxy" or self.origin=='sky':
+        if self.origin == "galaxy" or self.origin == "sky":
             self.xgc, self.ygc, self.zgc = self.xc, self.yc, self.zc
             self.vxgc, self.vygc, self.vzgc = self.vxc, self.vyc, self.vzc
 
@@ -1110,7 +1137,9 @@ class StarCluster(object):
         indx = vtheta < 0.0
         rindx = np.random.rand(cluster.ntot) < q
 
-        vtheta[indx * rindx] = np.sqrt(vtheta[indx * rindx] * vtheta[indx * rindx])
+        vtheta[indx * rindx] = np.sqrt(
+            vtheta[indx * rindx] * vtheta[indx * rindx]
+        )
         cluster.x, cluster.y, cluster.z = bovy_coords.cyl_to_rect(r, theta, z)
         cluster.vx, cluster.vy, cluster.vz = bovy_coords.cyl_to_rect_vec(
             vr, vtheta, vz, theta
@@ -1193,7 +1222,7 @@ class StarCluster(object):
         if self.rorder is not None:
             msum = np.cumsum(self.m[self.rorder])
             indx = msum >= 0.5 * self.mtot
-            self.rm = self.r[self.rorder[indx][0]]  
+            self.rm = self.r[self.rorder[indx][0]]
             indx = msum >= 0.1 * self.mtot
             self.r10 = self.r[self.rorder[indx][0]]
 
@@ -1275,7 +1304,7 @@ class StarCluster(object):
 
             self.units = "realpc"
 
-            #if self.nb > 0:
+            # if self.nb > 0:
             #    yrs = (self.rbar * 1296000.0 / (2.0 * np.pi)) ** 1.5 / np.sqrt(
             #        self.zmbar
             #    )
@@ -1520,7 +1549,9 @@ class StarCluster(object):
                 x0 ** 2.0 + y0 ** 2.0 + z0 ** 2.0
             )
 
-            l0, b0, self.dist = bovy_coords.XYZ_to_lbd(x0, y0, z0, degree=True).T
+            l0, b0, self.dist = bovy_coords.XYZ_to_lbd(
+                x0, y0, z0, degree=True
+            ).T
             self.ra, self.dec = bovy_coords.lb_to_radec(l0, b0, degree=True).T
 
             vr0, pmll0, pmbb0 = bovy_coords.vxvyvz_to_vrpmllpmbb(
@@ -1546,8 +1577,12 @@ class StarCluster(object):
                 x0 ** 2.0 + y0 ** 2.0 + z0 ** 2.0
             )
 
-            l0, b0, self.dist_gc = bovy_coords.XYZ_to_lbd(x0, y0, z0, degree=True)
-            self.ra_gc, self.dec_gc = bovy_coords.lb_to_radec(l0, b0, degree=True)
+            l0, b0, self.dist_gc = bovy_coords.XYZ_to_lbd(
+                x0, y0, z0, degree=True
+            )
+            self.ra_gc, self.dec_gc = bovy_coords.lb_to_radec(
+                l0, b0, degree=True
+            )
 
             vr0, pmll0, pmbb0 = bovy_coords.vxvyvz_to_vrpmllpmbb(
                 vx0, vy0, vz0, l0, b0, self.dist_gc, degree=True
@@ -1628,7 +1663,9 @@ class StarCluster(object):
                 _extra_rot=True,
             ).T
 
-            l_gc, b_gc = bovy_coords.radec_to_lb(self.ra_gc, self.dec_gc, degree=True)
+            l_gc, b_gc = bovy_coords.radec_to_lb(
+                self.ra_gc, self.dec_gc, degree=True
+            )
             x0_gc, y0_gc, z0_gc = bovy_coords.lbd_to_XYZ(
                 l_gc, b_gc, self.dist_gc, degree=True
             )
@@ -1637,12 +1674,26 @@ class StarCluster(object):
             )
 
             pml_gc, pmb_gc = bovy_coords.pmrapmdec_to_pmllpmbb(
-                self.pmra_gc, self.pmdec_gc, self.ra_gc, self.dec_gc, degree=True
+                self.pmra_gc,
+                self.pmdec_gc,
+                self.ra_gc,
+                self.dec_gc,
+                degree=True,
             )
             vx0_gc, vy0_gc, vz0_gc = bovy_coords.vrpmllpmbb_to_vxvyvz(
-                self.vlos_gc, pml_gc, pmb_gc, l_gc, b_gc, self.dist_gc, degree=True
+                self.vlos_gc,
+                pml_gc,
+                pmb_gc,
+                l_gc,
+                b_gc,
+                self.dist_gc,
+                degree=True,
             )
-            self.vx_gc, self.vy_gc, self.vz_gc = bovy_coords.vxvyvz_to_galcenrect(
+            (
+                self.vx_gc,
+                self.vy_gc,
+                self.vz_gc,
+            ) = bovy_coords.vxvyvz_to_galcenrect(
                 vx0_gc,
                 vy0_gc,
                 vz0_gc,
@@ -1716,7 +1767,9 @@ class StarCluster(object):
         if do_key_params:
             self.key_params()
 
-    def to_units(self, units, do_order=False, do_key_params=False, r0=8.0, v0=220.0):
+    def to_units(
+        self, units, do_order=False, do_key_params=False, r0=8.0, v0=220.0
+    ):
         """
         NAME:
 
@@ -1751,85 +1804,87 @@ class StarCluster(object):
         elif units == "radec":
             origin0 = self.origin
             self.to_radec(do_key_params=do_key_params)
-            self.to_origin(origin0, do_order=do_order, do_key_params=do_key_params)
+            self.to_origin(
+                origin0, do_order=do_order, do_key_params=do_key_params
+            )
 
-
-    def convert_binary_units(self,param,from_units,to_units):
-        yrs = (self.rbar * 1296000.0 / (2.0 * np.pi)) ** 1.5 / np.sqrt(self.zmbar)
+    def convert_binary_units(self, param, from_units, to_units):
+        yrs = (self.rbar * 1296000.0 / (2.0 * np.pi)) ** 1.5 / np.sqrt(
+            self.zmbar
+        )
         days = 365.25 * yrs
         au = 1.49597870700e13
-        pc = 1296000.0e0/(2.0*np.pi)*au
-        rsun=6.960e10
-        su=pc/rsun*self.rbar
+        pc = 1296000.0e0 / (2.0 * np.pi) * au
+        rsun = 6.960e10
+        su = pc / rsun * self.rbar
 
+        param = np.array(param)
+        from_units = np.array(from_units)
+        tp_units = np.array(to_units)
 
-        param=np.array(param)
-        from_units=np.array(from_units)
-        tp_units=np.array(to_units)
+        for i in range(0, len(param)):
+            p = param[i]
 
-        for i in range(0,len(param)):
-            p=param[i]
-
-            if p=='pb':
-                #Convert to nbody first
-                if from_units[i]=='days':
-                    self.pb/=days
-                elif from_units[i]=='years':
-                    self.pb/=yrs
-                elif from_units[i]=='nbody':
+            if p == "pb":
+                # Convert to nbody first
+                if from_units[i] == "days":
+                    self.pb /= days
+                elif from_units[i] == "years":
+                    self.pb /= yrs
+                elif from_units[i] == "nbody":
                     pass
                 else:
-                    print('UNIT %s NOT FOUND' % from_units[i])
+                    print("UNIT %s NOT FOUND" % from_units[i])
 
-                if to_units[i]=='days':
-                    self.pb*=days
-                elif to_units[i]=='years':
-                    self.pb*=yrs
-                elif to_units[i]=='nbody':
+                if to_units[i] == "days":
+                    self.pb *= days
+                elif to_units[i] == "years":
+                    self.pb *= yrs
+                elif to_units[i] == "nbody":
                     pass
                 else:
-                    print('UNIT %s NOT FOUND' % from_units[i])
+                    print("UNIT %s NOT FOUND" % from_units[i])
 
-            elif p=='semi':
-                #Convert to nbody first
-                if from_units[i]=='pc':
-                    self.semi/=self.rbar
-                elif from_units[i]=='su':
-                    self.semi/=su
-                elif from_units[i]=='au':
-                    self.semi/=(pc/au)*self.rbar
-                elif from_units[i]=='nbody':
+            elif p == "semi":
+                # Convert to nbody first
+                if from_units[i] == "pc":
+                    self.semi /= self.rbar
+                elif from_units[i] == "su":
+                    self.semi /= su
+                elif from_units[i] == "au":
+                    self.semi /= (pc / au) * self.rbar
+                elif from_units[i] == "nbody":
                     pass
                 else:
-                    print('UNIT %s NOT FOUND' % from_units[i])
+                    print("UNIT %s NOT FOUND" % from_units[i])
 
-                if to_units[i]=='pc':
-                    self.semi*=self.rbar
-                elif to_units[i]=='su':
-                    self.semi*=su
-                elif to_units[i]=='au':
-                    self.semi*=(pc/au)*self.rbar
-                elif to_units[i]=='nbody':
+                if to_units[i] == "pc":
+                    self.semi *= self.rbar
+                elif to_units[i] == "su":
+                    self.semi *= su
+                elif to_units[i] == "au":
+                    self.semi *= (pc / au) * self.rbar
+                elif to_units[i] == "nbody":
                     pass
                 else:
-                    print('UNIT %s NOT FOUND' % to_units[i])
+                    print("UNIT %s NOT FOUND" % to_units[i])
 
-            elif p=='mass':
-                if from_units[i]=='Msun' or from_units[i]=='msun' :
-                    self.m1/=self.zmbar
-                    self.m2/=self.zmbar
-                elif from_units[i]=='nbody':
+            elif p == "mass":
+                if from_units[i] == "Msun" or from_units[i] == "msun":
+                    self.m1 /= self.zmbar
+                    self.m2 /= self.zmbar
+                elif from_units[i] == "nbody":
                     pass
 
-                if to_units=='Msun' or to_units[i]=='msun' :
-                    self.m1*=self.zmbar
-                    self.m2*=self.zmbar
-                elif to_units[i]=='nbody':
+                if to_units == "Msun" or to_units[i] == "msun":
+                    self.m1 *= self.zmbar
+                    self.m2 *= self.zmbar
+                elif to_units[i] == "nbody":
                     pass
 
-
-
-    def to_centre(self, do_order=False, do_key_params=False, centre_method=None):
+    def to_centre(
+        self, do_order=False, do_key_params=False, centre_method=None
+    ):
         """
         NAME:
 
@@ -1856,7 +1911,9 @@ class StarCluster(object):
         if self.origin != "centre":
 
             if self.origin != "cluster":
-                self.to_cluster(do_key_params=False, centre_method=centre_method)
+                self.to_cluster(
+                    do_key_params=False, centre_method=centre_method
+                )
 
             self.x -= self.xc
             self.y -= self.yc
@@ -1872,7 +1929,9 @@ class StarCluster(object):
         if do_key_params:
             self.key_params(do_order=do_order)
 
-    def to_cluster(self, do_order=False, do_key_params=False, centre_method=None):
+    def to_cluster(
+        self, do_order=False, do_key_params=False, centre_method=None
+    ):
         """
         NAME:
 
@@ -1913,14 +1972,14 @@ class StarCluster(object):
 
                 if self.centre_method == "orthographic":
                     self.x = np.cos(dec) * np.sin(ra - ra_gc)
-                    self.y = np.sin(dec) * np.cos(dec_gc) - np.cos(dec) * np.sin(
-                        dec_gc
-                    ) * np.cos(ra - ra_gc)
+                    self.y = np.sin(dec) * np.cos(dec_gc) - np.cos(
+                        dec
+                    ) * np.sin(dec_gc) * np.cos(ra - ra_gc)
                     self.z = np.zeros(len(self.x))
 
-                    self.vx = pmra * np.cos(ra - ra_gc) - pmdec * np.sin(dec) * np.sin(
-                        ra - ra_gc
-                    )
+                    self.vx = pmra * np.cos(ra - ra_gc) - pmdec * np.sin(
+                        dec
+                    ) * np.sin(ra - ra_gc)
                     self.vy = pmra * np.sin(dec_gc) * np.sin(
                         ra - ra_gc
                     ) + self.pmdec * (
@@ -1932,18 +1991,25 @@ class StarCluster(object):
                 else:
                     if self.centre_method == "VandeVen":
                         self.x = (
-                            (10800.0 / np.pi) * np.cos(dec) * np.sin(ra - ra_gc) / 60.0
+                            (10800.0 / np.pi)
+                            * np.cos(dec)
+                            * np.sin(ra - ra_gc)
+                            / 60.0
                         )
                         self.y = (
                             (10800.0 / np.pi)
                             * (
                                 np.sin(dec) * np.cos(dec_gc)
-                                - np.cos(dec) * np.sin(dec_gc) * np.cos(ra - ra_gc)
+                                - np.cos(dec)
+                                * np.sin(dec_gc)
+                                * np.cos(ra - ra_gc)
                             )
                             / 60.0
                         )
                     else:
-                        self.x = (self.x - self.xgc) * np.cos(np.radians(self.ygc))
+                        self.x = (self.x - self.xgc) * np.cos(
+                            np.radians(self.ygc)
+                        )
                         self.y = self.y - self.ygc
 
                     self.z = np.zeros(len(self.x))
@@ -2103,22 +2169,34 @@ class StarCluster(object):
         )
 
         self.x_tail = (
-            self.x * rot[:, 0, 0] + self.y * rot[:, 1, 0] + self.z * rot[:, 2, 0]
+            self.x * rot[:, 0, 0]
+            + self.y * rot[:, 1, 0]
+            + self.z * rot[:, 2, 0]
         )
         self.y_tail = (
-            self.x * rot[:, 0, 1] + self.y * rot[:, 1, 1] + self.z * rot[:, 2, 1]
+            self.x * rot[:, 0, 1]
+            + self.y * rot[:, 1, 1]
+            + self.z * rot[:, 2, 1]
         )
         self.z_tail = (
-            self.x * rot[:, 0, 2] + self.y * rot[:, 1, 2] + self.z * rot[:, 2, 2]
+            self.x * rot[:, 0, 2]
+            + self.y * rot[:, 1, 2]
+            + self.z * rot[:, 2, 2]
         )
         self.vx_tail = (
-            self.vx * rot[:, 0, 0] + self.vy * rot[:, 1, 0] + self.vz * rot[:, 2, 0]
+            self.vx * rot[:, 0, 0]
+            + self.vy * rot[:, 1, 0]
+            + self.vz * rot[:, 2, 0]
         )
         self.vy_tail = (
-            self.vx * rot[:, 0, 1] + self.vy * rot[:, 1, 1] + self.vz * rot[:, 2, 1]
+            self.vx * rot[:, 0, 1]
+            + self.vy * rot[:, 1, 1]
+            + self.vz * rot[:, 2, 1]
         )
         self.vz_tail = (
-            self.vx * rot[:, 0, 2] + self.vy * rot[:, 1, 2] + self.vz * rot[:, 2, 2]
+            self.vx * rot[:, 0, 2]
+            + self.vy * rot[:, 1, 2]
+            + self.vz * rot[:, 2, 2]
         )
 
         self.r_tail = np.sqrt(
@@ -2182,7 +2260,9 @@ class StarCluster(object):
     def rlagrange(self, nlagrange=10, projected=False):
         self.rn = rlagrange(self, nlagrange=nlagrange, projected=projected)
 
-    def rvirial(self, H=70.0, Om=0.3, overdens=200.0, nrad=20, projected=False):
+    def rvirial(
+        self, H=70.0, Om=0.3, overdens=200.0, nrad=20, projected=False
+    ):
         self.rv = rvirial(
             self, H=H, Om=Om, overdens=overdens, nrad=nrad, projected=projected
         )
@@ -2190,8 +2270,12 @@ class StarCluster(object):
     def virial_radius(self, projected=False):
         self.rv = virial_radius(self, projected=projected)
 
-    def rtidal(self, pot=MWPotential2014, rtiterate=0, rgc=None, r0=8.0, v0=220.0):
-        self.rt = rtidal(self, pot=pot, rtiterate=rtiterate, rgc=rgc, r0=r0, v0=v0)
+    def rtidal(
+        self, pot=MWPotential2014, rtiterate=0, rgc=None, r0=8.0, v0=220.0
+    ):
+        self.rt = rtidal(
+            self, pot=pot, rtiterate=rtiterate, rgc=rgc, r0=r0, v0=v0
+        )
 
     def rlimiting(
         self,
@@ -2596,9 +2680,14 @@ def sub_cluster(
             )
             subcluster.xc, subcluster.yc, subcluster.zc = 0.0, 0.0, 0.0
             subcluster.vxc, subcluster.vyc, subcluster.vzc = 0.0, 0.0, 0.0
-            subcluster.xc, subcluster.yc, subcluster.zc, subcluster.vxc, subcluster.vyc, subcluster.vzc = subcluster.find_centre(
-                0.0, 0.0, 0.0
-            )
+            (
+                subcluster.xc,
+                subcluster.yc,
+                subcluster.zc,
+                subcluster.vxc,
+                subcluster.vyc,
+                subcluster.vzc,
+            ) = subcluster.find_centre(0.0, 0.0, 0.0)
 
         else:
             subcluster.add_orbit(
@@ -2637,7 +2726,9 @@ def sub_cluster(
             if reset_nbody_scale or reset_nbody_radii:
                 subcluster.rbar = 4.0 * subcluster.rm / 3.0
 
-            subcluster.vstar = 0.06557 * np.sqrt(subcluster.zmbar / subcluster.rbar)
+            subcluster.vstar = 0.06557 * np.sqrt(
+                subcluster.zmbar / subcluster.rbar
+            )
             subcluster.tstar = subcluster.rbar / subcluster.vstar
 
     else:

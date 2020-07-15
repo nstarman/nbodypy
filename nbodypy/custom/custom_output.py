@@ -2,17 +2,6 @@
 
 import numpy as np
 
-import matplotlib.pyplot as plt
-from galpy.util import bovy_plot
-import os
-
-from ..main.cluster import sub_cluster
-from ..util.coordinates import sky_coords
-from ..main.functions import *
-from ..main.profiles import *
-from ..main.operations import *
-from ..observations.observations import *
-
 
 def p_prof_out(cluster, fileout, nrad=20, projected=False):
     # Write density profile (pprof.npy)
@@ -33,7 +22,10 @@ def p_prof_out(cluster, fileout, nrad=20, projected=False):
         else:
             rmin = rn[i - 1]
             rmax = rn[i]
-            vol = 4.0 * np.pi * (rmax ** 3.0) / 3.0 - 4.0 * np.pi * (rmin ** 3.0) / 3.0
+            vol = (
+                4.0 * np.pi * (rmax ** 3.0) / 3.0
+                - 4.0 * np.pi * (rmin ** 3.0) / 3.0
+            )
 
         p_prof.append(mn / vol)
         fileout.write("%f " % (p_prof[-1]))
@@ -74,7 +66,9 @@ def alpha_prof_out(
         projected=projected,
     )
 
-    fileout.write("%f %f %f %f %f " % (cluster.tphys, alpha, ealpha, yalpha, eyalpha))
+    fileout.write(
+        "%f %f %f %f %f " % (cluster.tphys, alpha, ealpha, yalpha, eyalpha)
+    )
     for i in range(0, len(m_mean)):
         fileout.write("%f " % m_mean[i])
     for i in range(0, len(dm)):
@@ -103,13 +97,22 @@ def obs_alpha_prof_out(
     **kwargs
 ):
 
-    #Get custom values of provided:
-    mtot=kwargs.pop('mtot',cluster.mtot)
-    rm=kwargs.pop('rm',cluster.rmpro)
-    trh=kwargs.pop('trh',half_mass_relaxation_time(cluster,projected=True))
+    # Get custom values of provided:
+    mtot = kwargs.pop("mtot", cluster.mtot)
+    rm = kwargs.pop("rm", cluster.rmpro)
+    trh = kwargs.pop("trh", half_mass_relaxation_time(cluster, projected=True))
 
     # Write alpha_profile and dalpha for a given mass and radius range (alpha_prof.npy)
-    m_mean, m_hist, dm, alpha, ealpha, yalpha, eyalpha, mbincorr = obs_mass_function(
+    (
+        m_mean,
+        m_hist,
+        dm,
+        alpha,
+        ealpha,
+        yalpha,
+        eyalpha,
+        mbincorr,
+    ) = obs_mass_function(
         cluster,
         mmin=mmin,
         mmax=mmax,
@@ -125,34 +128,40 @@ def obs_alpha_prof_out(
     )
 
     if omask is None:
-        rn=rlagrange(cluster,projected=projected)
-        r50lower=rn[3]
-        r50upper=rn[5]
+        rn = rlagrange(cluster, projected=projected)
+        r50lower = rn[3]
+        r50upper = rn[5]
     else:
         try:
             if projected:
-                r50lower=omask.rmlower*(cluster.rmpro/omask.rm)
-                r50upper=omask.rmupper*(cluster.rmpro/omask.rm) 
+                r50lower = omask.rmlower * (cluster.rmpro / omask.rm)
+                r50upper = omask.rmupper * (cluster.rmpro / omask.rm)
             else:
-                r50lower=omask.rmlower*(cluster.rm/omask.rm)
-                r50upper=omask.rmupper*(cluster.rm/omask.rm)  
+                r50lower = omask.rmlower * (cluster.rm / omask.rm)
+                r50upper = omask.rmupper * (cluster.rm / omask.rm)
         except:
-            r50lower=None
-            r50upper=None
+            r50lower = None
+            r50upper = None
 
-        if r50lower==None:
-            rn=rlagrange(cluster,projected=projected)
-            r50lower=rn[3]
-            r50upper=rn[5] 
-
+        if r50lower == None:
+            rn = rlagrange(cluster, projected=projected)
+            r50lower = rn[3]
+            r50upper = rn[5]
 
     if projected:
-        print('ALPHA50PRO: ',r50lower,cluster.rmpro,r50upper)
+        print("ALPHA50PRO: ", r50lower, cluster.rmpro, r50upper)
     else:
-        print('ALPHA50', r50lower,cluster.rm,r50upper)
+        print("ALPHA50", r50lower, cluster.rm, r50upper)
 
-      
-    lrprofn, aprof, dalpha, edalpha, ydalpha, eydalpha, mbincorr = obs_alpha_prof(
+    (
+        lrprofn,
+        aprof,
+        dalpha,
+        edalpha,
+        ydalpha,
+        eydalpha,
+        mbincorr,
+    ) = obs_alpha_prof(
         cluster,
         mmin=mmin,
         mmax=mmax,
@@ -167,7 +176,16 @@ def obs_alpha_prof_out(
         **kwargs,
     )
 
-    m_mean50, m_hist50, dm50, alpha50, ealpha50, yalpha50, eyalpha50, mbincorr50 = obs_mass_function(
+    (
+        m_mean50,
+        m_hist50,
+        dm50,
+        alpha50,
+        ealpha50,
+        yalpha50,
+        eyalpha50,
+        mbincorr50,
+    ) = obs_mass_function(
         cluster,
         mmin=mmin,
         mmax=mmax,
@@ -182,8 +200,8 @@ def obs_alpha_prof_out(
         **kwargs,
     )
 
-    print('a_g \t R/rm \t',lrprofn,'\t da/dlogr \t rm')
-    print(alpha,aprof,dalpha,cluster.rm)
+    print("a_g \t R/rm \t", lrprofn, "\t da/dlogr \t rm")
+    print(alpha, aprof, dalpha, cluster.rm)
     print(mbincorr < 0.5)
 
     fileout.write("%f %f %f %f " % (cluster.tphys, mtot, rm, trh))
@@ -200,6 +218,7 @@ def obs_alpha_prof_out(
         fileout.write("%f " % aprof[i])
 
     fileout.write("%f %f %f %f\n" % (dalpha, edalpha, ydalpha, eydalpha))
+
 
 def dalpha_out(
     cluster,

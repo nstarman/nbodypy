@@ -1,19 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Main.
-
-Routine Listings
-----------------
-cluster :
-functions :
-initialize :
-load :
-operations :
-orbit :
-profiles :
-
-
-"""
+"""Main."""
 
 __author__ = "Jeremy Webb"
 

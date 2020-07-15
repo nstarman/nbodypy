@@ -9,12 +9,15 @@ import numpy as np
 import numba
 from galpy.util import bovy_coords
 
-from ..util.constants import *
-from ..util.recipes import *
+from ..utils.constants import *
+from ..utils.recipes import *
 from .operations import *
-from ..util.plots import *
+from ..utils.plots import *
 
-def relaxation_time(cluster, rad=None, multimass=True, projected=False,method='spitzer'):
+
+def relaxation_time(
+    cluster, rad=None, multimass=True, projected=False, method="spitzer"
+):
     """
     NAME:
 
@@ -47,34 +50,37 @@ def relaxation_time(cluster, rad=None, multimass=True, projected=False,method='s
     """
 
     if rad is None and projected:
-        rad=cluster.rmpro
+        rad = cluster.rmpro
     elif rad is None:
-        rad=cluster.rm
+        rad = cluster.rm
 
-    grav=4.302e-3
+    grav = 4.302e-3
 
     if projected:
-        rindx=cluster.rpro < rad
+        rindx = cluster.rpro < rad
     else:
-        rindx=cluster.r < rad
-        
-    ntot=np.sum(rindx)
-    mbar=np.mean(cluster.m[rindx])
-    vol=4.0*np.pi*(rad**3.)/3.0
-    rho=ntot/vol
-    
-    v2=np.mean(cluster.v**2.)
-    
-    #v2=0.4*grav*cluster.mtot/rad
-    
-    lnlambda=np.log(0.4*cluster.ntot)
-    
-    trelax=v2**(3./2.)/(15.4*grav**2.*mbar**2.*rho*lnlambda)
+        rindx = cluster.r < rad
+
+    ntot = np.sum(rindx)
+    mbar = np.mean(cluster.m[rindx])
+    vol = 4.0 * np.pi * (rad ** 3.0) / 3.0
+    rho = ntot / vol
+
+    v2 = np.mean(cluster.v ** 2.0)
+
+    # v2=0.4*grav*cluster.mtot/rad
+
+    lnlambda = np.log(0.4 * cluster.ntot)
+
+    trelax = v2 ** (3.0 / 2.0) / (
+        15.4 * grav ** 2.0 * mbar ** 2.0 * rho * lnlambda
+    )
 
     # Units of Myr
-    trelax*= 3.086e13 / (3600.0 * 24.0 * 365.0 * 1000000.0)
+    trelax *= 3.086e13 / (3600.0 * 24.0 * 365.0 * 1000000.0)
 
     return trelax
+
 
 def half_mass_relaxation_time(cluster, multimass=True, projected=False):
     """
@@ -104,21 +110,22 @@ def half_mass_relaxation_time(cluster, multimass=True, projected=False):
 
     """
 
-    grav=4.302e-3
-    mass=cluster.mtot
-    ntot=float(cluster.ntot)
-    mbar=mass/ntot
-    lnlambda = np.log(0.4*ntot)
+    grav = 4.302e-3
+    mass = cluster.mtot
+    ntot = float(cluster.ntot)
+    mbar = mass / ntot
+    lnlambda = np.log(0.4 * ntot)
 
     if projected:
-        rm=cluster.rmpro
+        rm = cluster.rmpro
     else:
-        rm=cluster.rm
+        rm = cluster.rm
 
-
-    trelax=0.138*(mass**0.5)*(rm**1.5)/(mbar*np.sqrt(grav)*lnlambda)
+    trelax = (
+        0.138 * (mass ** 0.5) * (rm ** 1.5) / (mbar * np.sqrt(grav) * lnlambda)
+    )
     # Units of Myr
-    trelax*= 3.086e13 / (3600.0 * 24.0 * 365.0 * 1000000.0)
+    trelax *= 3.086e13 / (3600.0 * 24.0 * 365.0 * 1000000.0)
 
     return trelax
 
@@ -153,14 +160,20 @@ def core_relaxation_time(cluster, multimass=True, projected=False):
 
     """
 
-    lnlambda=np.log(0.4*cluster.ntot)
-    mtot=cluster.mtot
-    mbar=np.mean(cluster.m)
-    rc=cluster.r10
-    rh=cluster.rm
-    grav=4.302e-3
+    lnlambda = np.log(0.4 * cluster.ntot)
+    mtot = cluster.mtot
+    mbar = np.mean(cluster.m)
+    rc = cluster.r10
+    rh = cluster.rm
+    grav = 4.302e-3
 
-    trelax=(0.39/lnlambda)*np.sqrt(rc**3./(grav*mtot))*(mtot/mbar)*np.sqrt(rc*rh)/(rc+rh)
+    trelax = (
+        (0.39 / lnlambda)
+        * np.sqrt(rc ** 3.0 / (grav * mtot))
+        * (mtot / mbar)
+        * np.sqrt(rc * rh)
+        / (rc + rh)
+    )
 
     return trelax
 
@@ -491,7 +504,9 @@ def virial_radius(cluster, projected=False, full=True):
 
     if full:
         if projected:
-            x = np.array([cluster.x, cluster.y, np.zeros(cluster.ntot), cluster.m]).T
+            x = np.array(
+                [cluster.x, cluster.y, np.zeros(cluster.ntot), cluster.m]
+            ).T
         else:
             x = np.array([cluster.x, cluster.y, cluster.z, cluster.m]).T
 
@@ -734,15 +749,15 @@ def new_mass_function(
         if omask is not None:
             try:
                 mcorr = omask.mcorr
-                return_error=True
+                return_error = True
             except:
                 mcorr = np.ones(cluster.ntot)
-                return_error=False
+                return_error = False
         else:
             mcorr = np.ones(cluster.ntot)
-            return_error=False
+            return_error = False
     else:
-        return_error=True
+        return_error = True
 
     if projected:
         r = cluster.rpro
@@ -786,21 +801,31 @@ def new_mass_function(
 
     if np.sum(indx) >= nmass:
         if omask is None:
-            m_lower, m_mean, m_upper, m_hist = nbinmaker(cluster.m[indx], nmass)
-            m_corr_hist=m_hist
-            mbinerror=np.ones(nmass)
+            m_lower, m_mean, m_upper, m_hist = nbinmaker(
+                cluster.m[indx], nmass
+            )
+            m_corr_hist = m_hist
+            mbinerror = np.ones(nmass)
         else:
             try:
-                m_lower, m_mean, m_upper = omask.m_lower, omask.m_mean, omask.m_upper
+                m_lower, m_mean, m_upper = (
+                    omask.m_lower,
+                    omask.m_mean,
+                    omask.m_upper,
+                )
                 nmass = len(m_mean)
                 m_hist = np.zeros(nmass)
             except:
-                m_lower, m_mean, m_upper, m_hist = nbinmaker(cluster.m[indx], nmass)
+                m_lower, m_mean, m_upper, m_hist = nbinmaker(
+                    cluster.m[indx], nmass
+                )
 
             m_corr_hist = np.zeros(len(m_hist))
             for i in range(0, len(m_hist)):
-                mindx = (cluster.m >= m_lower[i]) * (cluster.m < m_upper[i]) * indx
-                m_hist[i]=np.sum(mindx)
+                mindx = (
+                    (cluster.m >= m_lower[i]) * (cluster.m < m_upper[i]) * indx
+                )
+                m_hist[i] = np.sum(mindx)
                 m_corr_hist[i] = np.sum(1.0 / mcorr[mindx])
 
             mbinerror = m_hist / m_corr_hist
@@ -815,11 +840,16 @@ def new_mass_function(
 
         if plot:
             filename = kwargs.get("filename", None)
-            nplot(m_mean, np.log10(dm), xlabel="M", ylabel="LOG(dN/dM)", **kwargs)
+            nplot(
+                m_mean, np.log10(dm), xlabel="M", ylabel="LOG(dN/dM)", **kwargs
+            )
             mfit = np.linspace(np.min(m_mean), np.max(m_mean), nmass)
             dmfit = 10.0 ** (alpha * np.log10(mfit) + yalpha)
             nlplot(
-                mfit, np.log10(dmfit), overplot=True, label=(r"$\alpha$ = %f" % alpha)
+                mfit,
+                np.log10(dmfit),
+                overplot=True,
+                label=(r"$\alpha$ = %f" % alpha),
             )
 
             plt.legend()
@@ -828,7 +858,16 @@ def new_mass_function(
                 plt.savefig(filename)
 
         if return_error:
-            return m_mean, m_hist, dm, alpha, ealpha, yalpha, eyalpha, mbinerror
+            return (
+                m_mean,
+                m_hist,
+                dm,
+                alpha,
+                ealpha,
+                yalpha,
+                eyalpha,
+                mbinerror,
+            )
         else:
             return m_mean, m_hist, dm, alpha, ealpha, yalpha, eyalpha
     else:
@@ -842,6 +881,7 @@ def new_mass_function(
             -1000.0,
             -1000.0,
         )
+
 
 def mass_function(
     cluster,
@@ -948,11 +988,16 @@ def mass_function(
 
         if plot:
             filename = kwargs.get("filename", None)
-            nplot(m_mean, np.log10(dm), xlabel="M", ylabel="LOG(dN/dM)", **kwargs)
+            nplot(
+                m_mean, np.log10(dm), xlabel="M", ylabel="LOG(dN/dM)", **kwargs
+            )
             mfit = np.linspace(np.min(m_mean), np.max(m_mean), nmass)
             dmfit = 10.0 ** (alpha * np.log10(mfit) + yalpha)
             nlplot(
-                mfit, np.log10(dmfit), overplot=True, label=(r"$\alpha$ = %f" % alpha)
+                mfit,
+                np.log10(dmfit),
+                overplot=True,
+                label=(r"$\alpha$ = %f" % alpha),
             )
 
             plt.legend()
@@ -1092,10 +1137,21 @@ def eta_function(
 
         if plot:
             filename = kwargs.get("filename", None)
-            nplot(m_mean, np.log10(sigvm), xlabel="M", ylabel=r"$\sigma_v$", **kwargs)
+            nplot(
+                m_mean,
+                np.log10(sigvm),
+                xlabel="M",
+                ylabel=r"$\sigma_v$",
+                **kwargs
+            )
             mfit = np.linspace(np.min(m_mean), np.max(m_mean), nmass)
             sigfit = 10.0 ** (eta * np.log10(mfit) + yeta)
-            nlplot(mfit, np.log10(sigfit), overplot=True, label=(r"$\eta$ = %f" % eta))
+            nlplot(
+                mfit,
+                np.log10(sigfit),
+                overplot=True,
+                label=(r"$\eta$ = %f" % eta),
+            )
             plt.legend()
 
             if filename != None:
